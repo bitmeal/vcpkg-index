@@ -51,7 +51,7 @@ jobs:
           git config --global user.email "ci-build@vcpkg-index.git" &&
           git config --global user.name "ci-build"
       - run:
-          working_directory: ./app
+          working_directory: /data/dist
           command: |
               git init &&
               git add -A &&
