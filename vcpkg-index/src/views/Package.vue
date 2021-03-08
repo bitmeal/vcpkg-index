@@ -86,7 +86,7 @@
                     <span class="font-weight-light">
                       Depends 
                       <v-chip x-small class="ma-1" v-for="(dep, idx) in item.features[feature]['dependencies']" :key="`${(typeof dep == 'string') ? dep : dep.name}-${idx}`">
-                        <router-link :to="`/pkg/${(typeof dep == 'string') ? dep : dep.name}`" style="text-decoration: none;" >
+                        <router-link :to="`/index/pkg/${(typeof dep == 'string') ? dep : dep.name}`" style="text-decoration: none;" >
                           {{ (typeof dep == 'string') ? dep : dep.name }}
                         </router-link>
                       </v-chip>
@@ -101,7 +101,7 @@
             <v-divider class="mx-0 my-5"></v-divider>
               <span class="subtitle-2">Dependencies</span><br>
               <v-chip small class="ma-1" v-for="(dep, idx) in item['dependencies']" :key="`${(typeof dep == 'string') ? dep : dep.name}-${idx}`">
-                <router-link :to="`/pkg/${(typeof dep == 'string') ? dep : dep.name}`" style="text-decoration: none;" >
+                <router-link :to="`/index/pkg/${(typeof dep == 'string') ? dep : dep.name}`" style="text-decoration: none;" >
                   {{ (typeof dep == 'string') ? dep : dep.name }}
                 </router-link>
               </v-chip>

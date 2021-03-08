@@ -7,7 +7,7 @@
           style="max-width: 900px"
           align="start"
         >
-          <router-link :to="`/pkg/${item.name}`" style="text-decoration: none;">
+          <router-link :to="`/index/pkg/${item.name}`" style="text-decoration: none;">
             <v-card-title class="pkg-title">
               <v-icon class="pkg-icon" color="white" size="96px"
                 >mdi-package-variant</v-icon
