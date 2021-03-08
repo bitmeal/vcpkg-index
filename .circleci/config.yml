@@ -66,6 +66,13 @@ jobs:
 
 workflows:
   app:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
     jobs:
       - index:
           filters:
