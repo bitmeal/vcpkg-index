@@ -46,8 +46,11 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "15:29:09:82:7c:91:e1:5e:3d:75:be:d4:53:10:57:bf"
+      # adding github.com to known host without checking is dangerous!
+      # considered ok, as data is not sensitive
       - run: |
           apk add git openssh &&
+          ssh-keyscan github.com >> ~/.ssh/known_hosts &&
           git config --global user.email "ci-build@vcpkg-index.git" &&
           git config --global user.name "ci-build"
       - run:
