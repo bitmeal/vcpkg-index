@@ -58,8 +58,12 @@ jobs:
               git push -f git@github.com:bitmeal/vcpkg-index.git master:gh-pages
 
 workflows:
-  build:
+  app:
     jobs:
       - index
-      - build
-      - dist
+      - build:
+          requires:
+              - index
+      - dist:
+          requires:
+              - build
