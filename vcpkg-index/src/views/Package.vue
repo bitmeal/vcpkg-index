@@ -33,7 +33,7 @@
             <span class="subtitle-2">Latest Version</span><br>
             <span class="font-weight-light">{{ item['version'] || item['version-string'] }}</span>
             <template v-if="item['license']">
-              <br>
+              <br><br>
               <span class="subtitle-2">License</span><br>
               <span class="font-weight-light">{{ item.license }}</span>
             </template>

@@ -37,6 +37,13 @@
         </v-card>
       </v-col>
     </v-row>
+    <v-overlay style="height: 100vh" :value="loading" :absolute="true">
+    <v-progress-circular
+      indeterminate
+      size="128"
+    ></v-progress-circular>
+  </v-overlay>
+
   </v-container>
 </template>
 
@@ -58,12 +65,14 @@ export default {
 
   data() {
     return {
-      items: []
+      items: [],
+      loading: false,
     };
   },
   methods: {
     updatePackageSearch(search) {
-      console.log(`update for search token ${search}`)
+      this.loading = true;
+      // console.log(`update for search token ${search}`);
       if(search && search != null && search != '') {
         let query = {
             $or: search
@@ -77,11 +86,12 @@ export default {
                     }
                   })
           };
-        console.log(query);
+        // console.log(query);
         // this.db.find({ fts: (new RegExp(search)) }, (err, docs) => {
         this.db.find(query)
           .sort({ name: 1 })
           .exec((err, docs) => {
+            this.loading = false;
             if(!err) {
               this.items = docs;
             }
@@ -95,6 +105,7 @@ export default {
         this.db.find({})
           .sort({ name: 1 })
           .exec((err, docs) => {
+            this.loading = false;
             if(!err) {
               this.items = docs;
             }
@@ -144,7 +155,7 @@ export default {
   bottom: 0;
   right: 0;
   width: 100%;
-  height: 48px;
+  height: 42px;
   background: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0),
