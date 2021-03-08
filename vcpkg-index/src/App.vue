@@ -11,7 +11,8 @@
           solo dense
           prepend-inner-icon="mdi-magnify"
           clearable
-          @keydown.enter="updatePackageSearch(search)"
+          @keydown.enter="search_pkg(search)"
+          @click:clear="search_pkg('')"
           v-model="search"
           style="max-width: 900px;"
           class="mt-5 mx-3 mx-md-12"
@@ -22,7 +23,7 @@
     </v-app-bar>
 
     <v-main>
-      <router-view :items="packages" :db="db"/>
+      <router-view :db="db"/>
     </v-main>
   </v-app>
 </template>
@@ -38,53 +39,13 @@ export default {
     return {
       db: new DB(),
       packages: [],
-      search: '',
+      search: ''
     };
   },
   methods: {
-    updatePackageSearch(search) {
-      if(this.$route.name != 'index') {
-        this.$router.push('/');
-      }
-      
-      if(search && search != null && search != '') {
-        let query = {
-            $or: search
-                  .toLowerCase()
-                  .split(/\s+/)
-                  .filter( token => token != '' )
-                  .map( token => token.trim() )
-                  .map((token) => {
-                    return {
-                      fts: (new RegExp(token))
-                    }
-                  })
-          };
-        console.log(query);
-        // this.db.find({ fts: (new RegExp(search)) }, (err, docs) => {
-        this.db.find(query)
-          .sort({ name: 1 })
-          .exec((err, docs) => {
-            if(!err) {
-              this.packages = docs;
-            }
-            else {
-              console.log(`error fetching packages for search term '${search}' from db!`);
-            }
-          }
-        );
-      }
-      else {
-        this.db.find({})
-          .sort({ name: 1 })
-          .exec((err, docs) => {
-            if(!err) {
-              this.packages = docs;
-            }
-            else {
-              console.log('error fetching all packages from db!');
-            }
-          });
+    search_pkg(search) {
+      if(this.$router.currentRoute.path != `/search/${search}`) {
+        this.$router.push(`/search/${search}`);
       }
     },
   },

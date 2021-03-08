@@ -16,7 +16,7 @@
           <v-card-text class="pt-3 px-6 pkg-text" style="text-align: justify">
             <template v-if="item['homepage']">
               <span class="subtitle-2">Homepage</span><br>
-              <span style="width: 100%; text-align: right"
+              <span
                 ><a :href="item.homepage">{{ item.homepage }}</a
                 ><br
               /></span>
@@ -24,14 +24,27 @@
             </template>
             <template v-if="item['maintainers']">
               <span class="subtitle-2">Maintainers</span><br>
-              <span class="font-weight-light" style="width: 100%; text-align: right">
+              <span class="font-weight-light">
                 {{ (Array.isArray(item.maintainers) ? item.maintainers : [item.maintainers]).join(', ') }}
                 <br/>
               </span>
               <br>
             </template>
             <span class="subtitle-2">Latest Version</span><br>
-            <span class="font-weight-light">{{ item['version-string'] }}</span>
+            <span class="font-weight-light">{{ item['version'] || item['version-string'] }}</span>
+            <template v-if="item['license']">
+              <br>
+              <span class="subtitle-2">License</span><br>
+              <span class="font-weight-light">{{ item.license }}</span>
+            </template>
+            <template v-if="item['supports']">
+              <br><br>
+              <span class="subtitle-2">Supports</span><br>
+              <template v-for="pf in resolvePlatforms(item['supports'])">
+                <v-chip x-small style="color: white;" :color="pf[0] == '!' ? 'red' : 'green'" class="ma-1" :key="pf">{{ pf[0] == '!' ? pf.slice(1) : pf }}</v-chip>
+              </template>
+            </template>
+
             <v-divider class="mx-0 my-5"></v-divider>
             <template
               v-for="(par, idx) in Array.isArray(item.description)
@@ -48,12 +61,22 @@
             <template v-if="item['features']">
               <v-divider class="mx-0 my-5"></v-divider>
               <span class="subtitle-2">Features</span><br>
+              <span v-if="item['default-features']" class="font-weight-light">
+                Default
+                <v-chip x-small class="ma-1" v-for="df in item['default-features']" :key="df">
+                  <a :href="`#${df}`" style="text-decoration: none;">
+                    {{ df }}
+                  </a>
+                </v-chip>
+              </span>
               <v-list>
                 <template v-for="(feature, idx) in Object.keys(item.features)">
                 <v-divider class="ml-5 mr-2 my-2" v-if="idx != 0"  :key="idx"></v-divider>
               <v-list-item three-line style="width: 100%" :key="feature">
                 <v-list-item-content>
                   <v-list-item-title class="subtitle-2">
+                                    <a :name="feature"></a>
+
                     {{ feature }}
                   </v-list-item-title>
                   <v-list-item-subtitle v-if="item.features[feature]['description']">
@@ -62,7 +85,7 @@
                   <template v-if="item.features[feature]['dependencies']">
                     <span class="font-weight-light">
                       Depends 
-                      <v-chip x-small class="ma-1" v-for="(dep, idx) in item.features[feature]['dependencies']" :key="((typeof dep == 'string') ? dep : dep.name) + `${idx}`">
+                      <v-chip x-small class="ma-1" v-for="(dep, idx) in item.features[feature]['dependencies']" :key="`${(typeof dep == 'string') ? dep : dep.name}-${idx}`">
                         <router-link :to="`/pkg/${(typeof dep == 'string') ? dep : dep.name}`" style="text-decoration: none;" >
                           {{ (typeof dep == 'string') ? dep : dep.name }}
                         </router-link>
@@ -77,7 +100,7 @@
             <template v-if="item['dependencies']">
             <v-divider class="mx-0 my-5"></v-divider>
               <span class="subtitle-2">Dependencies</span><br>
-              <v-chip small class="ma-1" v-for="dep in item['dependencies']" :key="(typeof dep == 'string') ? dep : dep.name">
+              <v-chip small class="ma-1" v-for="(dep, idx) in item['dependencies']" :key="`${(typeof dep == 'string') ? dep : dep.name}-${idx}`">
                 <router-link :to="`/pkg/${(typeof dep == 'string') ? dep : dep.name}`" style="text-decoration: none;" >
                   {{ (typeof dep == 'string') ? dep : dep.name }}
                 </router-link>
@@ -91,6 +114,8 @@
 </template>
 
 <script>
+const pfp = require('../platform-parser');
+
 export default {
   name: "Package",
 
@@ -109,6 +134,9 @@ export default {
     };
   },
   methods: {
+    resolvePlatforms(supports) {
+      return pfp.parse(supports).sort();
+    },
     getPackage(name) {
       this.db.find({ name: name }, (err, docs) => {
         if(err) {

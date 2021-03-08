@@ -45,19 +45,73 @@ export default {
   name: "Search",
 
   props: {
-    items: {
-      type: Array,
+    db: {
+      type: Object,
+    },
+    search: {
+      type: String,
       default: () => {
-        return [];
+        return '';
       },
     },
   },
 
   data() {
     return {
-      //
+      items: []
     };
   },
+  methods: {
+    updatePackageSearch(search) {
+      console.log(`update for search token ${search}`)
+      if(search && search != null && search != '') {
+        let query = {
+            $or: search
+                  .toLowerCase()
+                  .split(/\s+/)
+                  .filter( token => token != '' )
+                  .map( token => token.trim() )
+                  .map((token) => {
+                    return {
+                      fts: (new RegExp(token))
+                    }
+                  })
+          };
+        console.log(query);
+        // this.db.find({ fts: (new RegExp(search)) }, (err, docs) => {
+        this.db.find(query)
+          .sort({ name: 1 })
+          .exec((err, docs) => {
+            if(!err) {
+              this.items = docs;
+            }
+            else {
+              console.log(`error fetching packages for search term '${search}' from db!`);
+            }
+          }
+        );
+      }
+      else {
+        this.db.find({})
+          .sort({ name: 1 })
+          .exec((err, docs) => {
+            if(!err) {
+              this.items = docs;
+            }
+            else {
+              console.log('error fetching all packages from db!');
+            }
+          });
+      }
+    },
+  },
+  watch: {
+    search(val) { this.updatePackageSearch(val); }
+  },
+  created() {
+    this.updatePackageSearch(this.search);
+  }
+
 };
 </script>
 

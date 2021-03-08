@@ -12,6 +12,17 @@ const routes = [
     component: Search
   },
   {
+    path: '/search',
+    name: 'searchall',
+    component: Search
+  },
+  {
+    path: '/search/:search',
+    name: 'search',
+    props: true,
+    component: Search
+  },
+  {
     path: '/pkg/:name',
     name: 'package',
     props: true,
