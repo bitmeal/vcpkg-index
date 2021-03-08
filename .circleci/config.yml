@@ -28,6 +28,7 @@ jobs:
       - checkout
       - attach_workspace:
           at: /data
+      - run: cp /data/vcpkg-index.json ./
       - run:
           working_directory: ./app
           command: npm install && npm run build
