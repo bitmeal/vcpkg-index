@@ -31,7 +31,10 @@ jobs:
       - run: cp /data/vcpkg-index.json ./
       - run:
           working_directory: ./app
-          command: npm install && npm run build
+          command: |
+              npm install &&
+              NODE_ENV=production npm run build &&
+              cp ./dist/index.html ./dist/404.html
       - run: cp -r ./app/dist/ /data/
       - persist_to_workspace:
           root: /data
