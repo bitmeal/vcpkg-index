@@ -1,14 +1,13 @@
 {
   "name": "vcpkg-index",
   "version": "1.0.0",
-  "description": "",
-  "main": "makeindex.js",
+  "description": "online vcpkg package index viewer",
   "scripts": {
     "fetch-vcpkg": "git clone https://github.com/microsoft/vcpkg",
     "make-index": "node makeindex vcpkg/ports/"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Arne Wendt @bitmeal",
+  "license": "MPL-2.0",
   "dependencies": {
     "colors": "^1.4.0",
     "debian-control": "^1.0.0",
