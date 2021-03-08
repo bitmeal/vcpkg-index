@@ -4,7 +4,7 @@
       <v-container style="width: 100%; position: relative; display: flex; align-content: center; justify-content: center;" fill-height class="my-0 py-0">
         <v-row>
           <v-col style="display: flex; justify-content: center;">
-            <v-icon size="160" color="#028bcf">mdi-package-variant</v-icon>
+            <v-icon size="160" color="#028bcf">{{ search_focus ? 'mdi-package-variant' : 'mdi-package-variant-closed' }}</v-icon>
           </v-col>
         </v-row>
         <v-row>
@@ -20,6 +20,8 @@
           clearable
           @keydown.enter="search_pkg(search)"
           @click:clear="search_pkg('')"
+          @focus="search_focus = true"
+          @blur="search_focus = false"
           v-model="search"
           label="Search vcpkg packages"
           style="max-width: 600px;"
@@ -40,6 +42,7 @@ export default {
   data() {
     return {
       search: '',
+      search_focus: false,
     };
   },
   methods: {

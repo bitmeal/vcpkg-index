@@ -10,7 +10,7 @@
           <router-link :to="`/index/pkg/${item.name}`" style="text-decoration: none;">
             <v-card-title class="pkg-title">
               <v-icon class="pkg-icon" color="white" size="96px"
-                >mdi-package-variant</v-icon
+                >mdi-package-variant-closed</v-icon
               >
               <span class="pkg-title-text">{{ item.name }}</span>
             </v-card-title>
