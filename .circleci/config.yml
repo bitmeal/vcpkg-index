@@ -65,7 +65,7 @@ jobs:
               git push -f git@github.com:bitmeal/vcpkg-index.git master:gh-pages
 
 workflows:
-  app:
+  cron:
     triggers:
       - schedule:
           cron: "0 0 * * *"
@@ -73,6 +73,16 @@ workflows:
             branches:
               only:
                 - master
+    jobs:
+      - index
+      - build:
+          requires:
+              - index
+      - dist:
+          requires:
+              - build
+
+  commit:
     jobs:
       - index:
           filters:
