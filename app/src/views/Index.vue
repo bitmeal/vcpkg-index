@@ -36,7 +36,7 @@
 <script>
 const DB = require('nedb');
 
-const index = require('../vcpkg-index.json');
+const index = require('../../../vcpkg-index.json');
 
 export default {
   name: "Index",

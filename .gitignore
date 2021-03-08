@@ -1,3 +1,6 @@
 node_modules/
 
+vcpkg/
+vcpkg-index.json
+
 .vscode/

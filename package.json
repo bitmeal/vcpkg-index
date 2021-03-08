@@ -4,6 +4,8 @@
   "description": "",
   "main": "makeindex.js",
   "scripts": {
+    "fetch-vcpkg": "git clone https://github.com/microsoft/vcpkg",
+    "make-index": "node makeindex vcpkg/ports/"
   },
   "author": "",
   "license": "ISC",
