@@ -207,7 +207,7 @@ async function parse_ports(rootpath) {
     );
 }
 
-function build_ports_index(rootpath) {
+function build_ports_index(rootpath, output) {
     parse_ports(rootpath).then((ports) => {
         let ports_idx = ports.reduce((acc, port) => {
             if(port['name']) {
@@ -219,12 +219,27 @@ function build_ports_index(rootpath) {
             return acc;
         }, {});
 
-        fs.writeFileSync(path.resolve(rootpath, 'vcpkg-index.json'), JSON.stringify(ports_idx));
+        fs.writeFileSync(output ? path.resolve(output) : path.resolve('.', 'vcpkg-index.json'), JSON.stringify(ports_idx));
     });
 }
 
 module.exports.read_control_file = read_control_file
 module.exports.parse_ports = parse_ports
 module.exports.build_ports_index = build_ports_index;
-// let rootpath = '.';
-// export_ports(path.resolve(rootpath, 'vcpkg-packages.json'), parse_ports(rootpath));
+
+
+if (require.main === module) {
+    let args = process.argv.slice(2);
+
+    if(args.length != 1) {
+        console.log('usage: node makeindex <path/to/vcpkg/ports>');
+        process.exit(1);
+    }
+    
+    if(!fs.existsSync(path.resolve(args[0]))) {
+        console.error(`provided path does not exist! (${args[0]})`);
+        process.exit(1);
+    }
+
+    build_ports_index(args[0]);
+}
