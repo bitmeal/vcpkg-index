@@ -48,8 +48,8 @@ jobs:
             - "15:29:09:82:7c:91:e1:5e:3d:75:be:d4:53:10:57:bf"
       - run: |
           apk add git &&
-          git config --global user.email "$GIT_AUTHOR_EMAIL" &&
-          git config --global user.name "$GIT_AUTHOR_NAME"
+          git config --global user.email "ci-build@vcpkg-index.git" &&
+          git config --global user.name "ci-build"
       - run:
           working_directory: ./app
           command: |
