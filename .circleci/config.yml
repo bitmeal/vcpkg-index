@@ -67,10 +67,22 @@ jobs:
 workflows:
   app:
     jobs:
-      - index
+      - index:
+          filters:
+              branches:
+                  only:
+                    - master
       - build:
           requires:
               - index
+          filters:
+              branches:
+                  only:
+                    - master
       - dist:
           requires:
               - build
+          filters:
+              branches:
+                  only:
+                    - master
