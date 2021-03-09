@@ -63,7 +63,7 @@ jobs:
           command: |
               git init &&
               git add -A &&
-              git commit -m 'deploy' &&
+              git commit -m "deploy $(date -uIseconds) [ci-skip]" &&
               git push -f git@github.com:bitmeal/vcpkg-index.git master:gh-pages
 
 workflows:
