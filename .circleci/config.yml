@@ -39,7 +39,7 @@ jobs:
               npm install &&
               NODE_ENV=production npm run build &&
               cp ./dist/index.html ./dist/404.html &&
-              [[ ! -z $PAGES_CUSTOM_DOMAIN ]] && echo "$PAGES_CUSTOM_DOMAIN" > CNAME
+              [[ ! -z $PAGES_CUSTOM_DOMAIN ]] && echo "$PAGES_CUSTOM_DOMAIN" > ./dist/CNAME
       - run: |
           cp ./vcpkg-index.json ./app/dist/ &&
           cp -r ./app/dist/ /data/
