@@ -45,6 +45,10 @@ jobs:
 
   dist:
     executor: alpine
+    environment:
+      # configure custom pages domain and base url
+      PAGES_CUSTOM_DOMAIN: vcpkg.dev
+      BASE_URL: /
     steps:
       - attach_workspace:
           at: /data
@@ -61,6 +65,7 @@ jobs:
       - run:
           working_directory: /data/dist
           command: |
+              [[ ! -z $PAGES_CUSTOM_DOMAIN ]] && echo "$PAGES_CUSTOM_DOMAIN" > CNAME ||
               git init &&
               git add -A &&
               git commit -m "[ci skip] deploy $(date -uIseconds)" &&
