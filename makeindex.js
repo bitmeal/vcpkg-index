@@ -1,9 +1,14 @@
 const path = require('path');
 const fs = require('fs');
+const glob = require('fast-glob');
+
 const util = require('util');
 const colors = require('colors');
+
 const deb_control = require('debian-control');
 const { Stream, Readable } = require('stream');
+
+const DB = require("nedb");
 
 
 const inspect_log_opts = {
@@ -178,29 +183,36 @@ function read_control_file(path) {
     });
 }
 
+
 async function parse_ports(rootpath) {
     return Promise.all(
-        fs.readdirSync(path.resolve(rootpath), {withFileTypes: true})
-        .map((dirent) => {
-            return new Promise((resolve, reject) => {
-                let control_file_path = path.resolve(rootpath, dirent.name, 'CONTROL');
-                let vcpkg_file_path = path.resolve(rootpath, dirent.name, 'vcpkg.json');
-                
-                if(dirent.isDirectory()) {
-                    if(fs.existsSync(vcpkg_file_path)) {
-                        const file = fs.readFileSync(vcpkg_file_path, 'utf8');
-                        resolve(JSON.parse(file));
-                    }
-                    else if(fs.existsSync(control_file_path)) {
-                        read_control_file(control_file_path).then((data) => { resolve(data); });
+        glob
+        .sync('*/{vcpkg.json,CONTROL}', {cwd: path.resolve(rootpath), absolute: true})
+        .sort()
+        .reduce((acc, pkg_file) => {
+                let tail = acc.slice(-1)[0];
+                if(tail && path.dirname(tail) == path.dirname(pkg_file)){
+                    if(path.basename(pkg_file) == 'vcpkg.json') {
+                        acc[acc.length - 1] = pkg_file;
+                        console.log('replacing CONTROL with vcpkg.json');
                     }
                     else {
-                        console.log(`could not find CONTROL or vcpkg.json in ${dirent.name}`);
-                        resolve({});
+                        console.log('ignoring CONTROL for vcpkg.json');
                     }
                 }
                 else {
-                    resolve({});
+                    acc.push(pkg_file);
+                }
+                return acc;
+            },
+        [])
+        .map((pkg_file) => {
+            return new Promise((resolve, reject) => {
+                if(path.basename(pkg_file) == 'CONTROL') {
+                    read_control_file(pkg_file).then((data) => { resolve(data); });
+                }
+                else { // assume vcpkg.json
+                    resolve(require(pkg_file));
                 }
             });
         })
