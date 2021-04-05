@@ -187,7 +187,7 @@ function read_control_file(path) {
 async function parse_ports(rootpath) {
     return Promise.all(
         glob
-        .sync('*/{vcpkg.json,CONTROL}', {cwd: path.resolve(rootpath), absolute: true})
+        .sync('*/**/{vcpkg.json,CONTROL}', {cwd: path.resolve(rootpath), absolute: true})
         .sort()
         .reduce((acc, pkg_file) => {
                 let tail = acc.slice(-1)[0];
@@ -219,19 +219,96 @@ async function parse_ports(rootpath) {
     );
 }
 
-function build_ports_index(rootpath, output) {
-    parse_ports(rootpath).then((ports) => {
-        let ports_idx = ports.reduce((acc, port) => {
-            if(port['name']) {
-                acc[port.name] = port;
-            }
-            else {
-                console.log(`[${'<unknown>'.blue}] port is ${'missing name or empty'.yellow} ${log_data(port)}`);
-            }
-            return acc;
-        }, {});
+function build_ports_index(rootpath, output, write_json = false) {
+    let base_path = () => {
+        return path.resolve(output || 'vcpkg-index');
+    }
+    let out_json = () => {
+        return path.resolve(base_path() + '.json');
+    };
+    let out_nedb = () => {
+        return path.resolve(base_path() + '.nedb');
+    };
 
-        fs.writeFileSync(output ? path.resolve(output) : path.resolve('.', 'vcpkg-index.json'), JSON.stringify(ports_idx));
+    parse_ports(rootpath).then((ports) => {
+        // write json index?
+        if(write_json) {
+            let ports_idx = ports.reduce((acc, port) => {
+                if(port['name']) {
+                    acc[port.name] = port;
+                }
+                else {
+                    console.log(`[${'<unknown>'.blue}] port is ${'missing name or empty'.yellow} ${log_data(port)}`);
+                }
+                return acc;
+            }, {});
+            
+            fs.writeFileSync(out_json(), JSON.stringify(ports_idx));
+        }
+
+        // build nedb
+        if(fs.existsSync(out_nedb())) {
+            console.warn('deleting vcpkg-index.nedb');
+            try {
+                fs.unlinkSync(out_nedb());
+            } catch (err) {
+                console.error('error deleting', out_nedb(), '-', err);
+                process.exit(1);
+            }
+        }
+    
+        let db = new DB({ filename: out_nedb(), autoload: true });
+
+        db.insert(
+            ports.map((pkg) => {
+              // drop: $<key> and _id
+              let drop_restricted = (obj) => {
+                Object.keys(obj).forEach((key) => {
+                  if (key[0] == "$" || key == "_id") {
+                    delete obj[key];
+                  }
+                  if (typeof obj[key] === "object" && obj[key] !== null) {
+                    drop_restricted(obj[key]);
+                  }
+                });
+              };
+              drop_restricted(pkg);
+              // make full text search property
+              return Object.assign(
+                {},
+                {
+                  fts: [
+                    pkg["name"] || "",
+                    pkg["homepage"] || "",
+                    ((m) => {
+                      return Array.isArray(m) ? m : [m];
+                    })(pkg["maintainers"] || []).join(" "),
+                    Object.keys(pkg["features"] || {})
+                      .map((feature) => {
+                        return `${feature} ${
+                          pkg.features[feature]["description"] || ""
+                        }`;
+                      })
+                      .join(" "),
+                    (Array.isArray(pkg.description)
+                      ? pkg.description
+                      : [pkg.description]
+                    ).join(" "),
+                  ]
+                    .join(" ")
+                    .toLowerCase(),
+                },
+                pkg
+              );
+            }),
+            (err, docs) => {
+              if (err) {
+                console.log(`an error occured while inserting packages to db: ${err}`);
+                process.exit(1);
+              }
+            }
+          );
+      
     });
 }
 
