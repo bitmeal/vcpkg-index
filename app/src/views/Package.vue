@@ -266,14 +266,14 @@ export default {
     getPackage(name) {
       this.db.find({ name: name }, (err, docs) => {
         if (err) {
-          console.log(`${err} thrown while fetching ${name}`);
+          console.error(`${err} thrown while fetching ${name}`);
         } else if (docs.length == 0) {
-          console.log(`could not retrieve ${name} from database!`);
+          console.error(`could not retrieve ${name} from database!`);
         } else {
           if (docs.length != 1) {
-            console.log(`multiple results for ${name}; using first!`);
+            console.warn(`multiple results for ${name}; using first!`);
           }
-          console.log(docs[0]);
+          // console.log(docs[0]);
           this.item = docs[0];
         }
       });

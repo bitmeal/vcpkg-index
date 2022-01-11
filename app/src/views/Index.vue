@@ -55,17 +55,38 @@
 </template>
 
 <script>
-const DB = require("nedb");
+// process.platform = 'win64'; // patch platform to disable nedb directory fsync
+const DB = require('nestdb');
 
-const index = require("../../../vcpkg-index.json");
+const browserfs = require('browserfs');
+const fs_config = {
+  fs: 'MountableFileSystem',
+  options: {
+    '/db': {
+      fs: 'OverlayFS',
+      options: {
+        readable: {
+          fs: 'HTTPRequest',
+          options: {
+            index: require('./../dbfs.json'),
+            baseUrl: '/db',
+          },
+        },
+        writable: {
+          fs: 'InMemory'
+        }
+      }
+    }
+  }
+};
 
 export default {
-  name: "Index",
+  name: 'Index',
   data() {
     return {
-      db: new DB(),
-      packages: [],
-      search: "",
+      db: null, //new DB(),
+      // packages: [],
+      search: '',
     };
   },
   methods: {
@@ -79,62 +100,18 @@ export default {
   created() {
     /* eslint-disable-next-line no-useless-escape */
     let sp = this.$router.currentRoute.path.match(/\/search\/([^\/]*)\/?/);
-    if (sp && sp[1] && sp[1] != "") {
+    if (sp && sp[1] && sp[1] != '') {
       this.search = sp[1];
     }
 
-    this.db.insert(
-      Object.values(index).map((pkg) => {
-        // drop: $<key> and _id
-        let drop_restricted = (obj) => {
-          Object.keys(obj).forEach((key) => {
-            if (key[0] == "$" || key == "_id") {
-              delete obj[key];
-            }
-            if (typeof obj[key] === "object" && obj[key] !== null) {
-              drop_restricted(obj[key]);
-            }
-          });
-        };
-        drop_restricted(pkg);
-        // make full text search property
-        return Object.assign(
-          {},
-          {
-            fts: [
-              pkg["name"] || "",
-              pkg["homepage"] || "",
-              ((m) => {
-                return Array.isArray(m) ? m : [m];
-              })(pkg["maintainers"] || []).join(" "),
-              Object.keys(pkg["features"] || {})
-                .map((feature) => {
-                  return `${feature} ${
-                    pkg.features[feature]["description"] || ""
-                  }`;
-                })
-                .join(" "),
-              (Array.isArray(pkg.description)
-                ? pkg.description
-                : [pkg.description]
-              ).join(" "),
-            ]
-              .join(" ")
-              .toLowerCase(),
-          },
-          pkg
-        );
-      }),
-      (err, docs) => {
-        this.packages = docs;
-
-        if (err) {
-          console.log(
-            `an error occured while inserting packages to db: ${err}`
-          );
-        }
+    browserfs.configure(fs_config, (err) => {
+      if (err) {
+        console.error('error creating filesystem!');
+        throw err;
       }
-    );
+
+      this.db = new DB({ filename: '/db/vcpkg-index.nedb', autoload: true});
+    });
   },
 };
 </script>

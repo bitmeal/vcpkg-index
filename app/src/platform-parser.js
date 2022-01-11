@@ -2,7 +2,7 @@ const jsep = require('jsep');
 
 function parse(tokenstring) {
     let ast = jsep(tokenstring);
-    console.log(ast);
+
     // |: flatten left/right
     // &: combine left/right for each
     // !: prefix '!' for each
