@@ -1,9 +1,14 @@
 const path = require('path');
 const fs = require('fs');
+const glob = require('fast-glob');
+
 const util = require('util');
 const colors = require('colors');
+
 const deb_control = require('debian-control');
 const { Stream, Readable } = require('stream');
+
+const DB = require('nedb');
 
 
 const inspect_log_opts = {
@@ -178,48 +183,132 @@ function read_control_file(path) {
     });
 }
 
+
 async function parse_ports(rootpath) {
     return Promise.all(
-        fs.readdirSync(path.resolve(rootpath), {withFileTypes: true})
-        .map((dirent) => {
-            return new Promise((resolve, reject) => {
-                let control_file_path = path.resolve(rootpath, dirent.name, 'CONTROL');
-                let vcpkg_file_path = path.resolve(rootpath, dirent.name, 'vcpkg.json');
-                
-                if(dirent.isDirectory()) {
-                    if(fs.existsSync(vcpkg_file_path)) {
-                        const file = fs.readFileSync(vcpkg_file_path, 'utf8');
-                        resolve(JSON.parse(file));
-                    }
-                    else if(fs.existsSync(control_file_path)) {
-                        read_control_file(control_file_path).then((data) => { resolve(data); });
+        glob
+        .sync('*/**/{vcpkg.json,CONTROL}', {cwd: path.resolve(rootpath), absolute: true})
+        .sort()
+        .reduce((acc, pkg_file) => {
+                let tail = acc.slice(-1)[0];
+                if(tail && path.dirname(tail) == path.dirname(pkg_file)){
+                    if(path.basename(pkg_file) == 'vcpkg.json') {
+                        acc[acc.length - 1] = pkg_file;
+                        console.log('replacing CONTROL with vcpkg.json');
                     }
                     else {
-                        console.log(`could not find CONTROL or vcpkg.json in ${dirent.name}`);
-                        resolve({});
+                        console.log('ignoring CONTROL for vcpkg.json');
                     }
                 }
                 else {
-                    resolve({});
+                    acc.push(pkg_file);
+                }
+                return acc;
+            },
+        [])
+        .map((pkg_file) => {
+            return new Promise((resolve, reject) => {
+                if(path.basename(pkg_file) == 'CONTROL') {
+                    read_control_file(pkg_file).then((data) => { resolve(data); });
+                }
+                else { // assume vcpkg.json
+                    resolve(require(pkg_file));
                 }
             });
         })
     );
 }
 
-function build_ports_index(rootpath, output) {
-    parse_ports(rootpath).then((ports) => {
-        let ports_idx = ports.reduce((acc, port) => {
-            if(port['name']) {
-                acc[port.name] = port;
-            }
-            else {
-                console.log(`[${'<unknown>'.blue}] port is ${'missing name or empty'.yellow} ${log_data(port)}`);
-            }
-            return acc;
-        }, {});
+function build_ports_index(rootpath, output, write_json = false) {
+    let base_path = () => {
+        return path.resolve(output || 'vcpkg-index');
+    }
+    let out_json = () => {
+        return path.resolve(base_path() + '.json');
+    };
+    let out_nedb = () => {
+        return path.resolve(base_path() + '.nedb');
+    };
 
-        fs.writeFileSync(output ? path.resolve(output) : path.resolve('.', 'vcpkg-index.json'), JSON.stringify(ports_idx));
+    parse_ports(rootpath).then((ports) => {
+        // write json index?
+        if(write_json) {
+            let ports_idx = ports.reduce((acc, port) => {
+                if(port['name']) {
+                    acc[port.name] = port;
+                }
+                else {
+                    console.log(`[${'<unknown>'.blue}] port is ${'missing name or empty'.yellow} ${log_data(port)}`);
+                }
+                return acc;
+            }, {});
+            
+            fs.writeFileSync(out_json(), JSON.stringify(ports_idx));
+        }
+
+        // build nedb
+        if(fs.existsSync(out_nedb())) {
+            console.warn('deleting vcpkg-index.nedb');
+            try {
+                fs.unlinkSync(out_nedb());
+            } catch (err) {
+                console.error('error deleting', out_nedb(), '-', err);
+                process.exit(1);
+            }
+        }
+    
+        let db = new DB({ filename: out_nedb(), autoload: true });
+
+        db.insert(
+            ports.map((pkg) => {
+              // drop: $<key> and _id
+              let drop_restricted = (obj) => {
+                Object.keys(obj).forEach((key) => {
+                  if (key[0] == "$" || key == "_id") {
+                    delete obj[key];
+                  }
+                  if (typeof obj[key] === "object" && obj[key] !== null) {
+                    drop_restricted(obj[key]);
+                  }
+                });
+              };
+              drop_restricted(pkg);
+              // make full text search property
+              return Object.assign(
+                {},
+                {
+                  fts: [
+                    pkg["name"] || "",
+                    pkg["homepage"] || "",
+                    ((m) => {
+                      return Array.isArray(m) ? m : [m];
+                    })(pkg["maintainers"] || []).join(" "),
+                    Object.keys(pkg["features"] || {})
+                      .map((feature) => {
+                        return `${feature} ${
+                          pkg.features[feature]["description"] || ""
+                        }`;
+                      })
+                      .join(" "),
+                    (Array.isArray(pkg.description)
+                      ? pkg.description
+                      : [pkg.description]
+                    ).join(" "),
+                  ]
+                    .join(" ")
+                    .toLowerCase(),
+                },
+                pkg
+              );
+            }),
+            (err, docs) => {
+              if (err) {
+                console.log(`an error occured while inserting packages to db: ${err}`);
+                process.exit(1);
+              }
+            }
+          );
+      
     });
 }
 

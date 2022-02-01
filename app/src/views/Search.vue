@@ -96,7 +96,7 @@ export default {
               this.items = docs;
             }
             else {
-              console.log(`error fetching packages for search term '${search}' from db!`);
+              console.error(`error fetching packages for search term '${search}' from db!`);
             }
           }
         );
@@ -110,7 +110,7 @@ export default {
               this.items = docs;
             }
             else {
-              console.log('error fetching all packages from db!');
+              console.error('error fetching all packages from db!');
             }
           });
       }

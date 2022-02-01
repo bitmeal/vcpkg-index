@@ -3,15 +3,18 @@
   "version": "1.0.0",
   "description": "online vcpkg package index viewer",
   "scripts": {
-    "fetch-vcpkg": "git clone https://github.com/microsoft/vcpkg",
-    "make-index": "node makeindex vcpkg/ports/"
+    "fetch:vcpkg": "git clone https://github.com/microsoft/vcpkg",
+    "make:index": "node makeindex vcpkg/ports/",
+    "deploy:index": "cp *.nedb app/public/db/ && cd app && npm run make:dbfs"
   },
   "author": "Arne Wendt @bitmeal",
   "license": "MPL-2.0",
   "dependencies": {
     "colors": "^1.4.0",
     "debian-control": "^1.0.0",
+    "fast-glob": "^3.2.5",
     "fs": "^0.0.1-security",
+    "nedb": "github:bitmeal/nestdb",
     "path": "^0.12.7",
     "yaml": "^1.10.0"
   }

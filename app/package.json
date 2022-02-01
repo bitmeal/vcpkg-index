@@ -5,12 +5,17 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "make:dbfs": "cd public/db && npx make_http_index > ../../src/dbfs.json"
   },
   "dependencies": {
+    "browserfs": "^2.0.0",
     "core-js": "^3.6.5",
+    "fs-constants": "^1.0.0",
+    "fs-promise-polyfill": "^1.1.3",
+    "fs.promises": "^0.1.2",
     "jsep": "^0.3.5",
-    "nedb": "^1.8.0",
+    "nedb": "github:bitmeal/nestdb",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
     "vuetify": "^2.4.0"

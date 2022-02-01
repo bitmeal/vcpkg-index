@@ -15,12 +15,12 @@ jobs:
       - checkout
       - run: mkdir /data
       - run: apk add git
-      - run: npm install && npm run fetch-vcpkg && npm run make-index
-      - run: cp ./vcpkg-index.json /data/
+      - run: npm ci && npm run fetch:vcpkg && npm run make:index
+      - run: cp ./vcpkg-index.nedb /data/
       - persist_to_workspace:
           root: /data
           paths:
-            - vcpkg-index.json
+            - vcpkg-index.nedb
 
   build:
     executor: node-alpine
@@ -32,16 +32,16 @@ jobs:
       - checkout
       - attach_workspace:
           at: /data
-      - run: cp /data/vcpkg-index.json ./
+      - run: mv /data/vcpkg-index.nedb ./app/public/db/
       - run:
           working_directory: ./app
           command: |
-              npm install &&
+              npm ci &&
+              npm run make:dbfs &&
               NODE_ENV=production npm run build &&
               cp ./dist/index.html ./dist/404.html &&
               [[ ! -z $PAGES_CUSTOM_DOMAIN ]] && echo "$PAGES_CUSTOM_DOMAIN" > ./dist/CNAME
       - run: |
-          cp ./vcpkg-index.json ./app/dist/ &&
           cp -r ./app/dist/ /data/
       - persist_to_workspace:
           root: /data
