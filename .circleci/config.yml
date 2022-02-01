@@ -32,7 +32,7 @@ jobs:
       - checkout
       - attach_workspace:
           at: /data
-      - run: mv /data/vcpkg-index.nedb ./app/public/db/
+      - run: mkdir -p ./app/public/db && mv /data/vcpkg-index.nedb ./app/public/db/vcpkg-index.nedb
       - run:
           working_directory: ./app
           command: |
