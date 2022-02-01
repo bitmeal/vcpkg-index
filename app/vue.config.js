@@ -22,6 +22,7 @@ module.exports = {
       // use browserfs
       alias: {
         'fs': 'browserfs/dist/shims/fs.js',
+        // 'fs': require.resolve('./src/fs_shim.js'),
         'buffer': 'browserfs/dist/shims/buffer.js',
         'path': 'browserfs/dist/shims/path.js',
         'processGlobal': 'browserfs/dist/shims/process.js',
@@ -30,7 +31,9 @@ module.exports = {
       }
     },
     module: {
-      noParse: /browserfs\.js/
+      noParse: [
+        /browserfs\.js/
+      ]
     },
     plugins: [
       // Expose BrowserFS, process, and Buffer globals

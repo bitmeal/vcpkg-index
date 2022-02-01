@@ -56,7 +56,7 @@
 
 <script>
 // process.platform = 'win64'; // patch platform to disable nedb directory fsync
-const DB = require('nestdb');
+const DB = require('nedb');
 
 const browserfs = require('browserfs');
 const fs_config = {

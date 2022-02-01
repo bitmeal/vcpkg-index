@@ -8,7 +8,7 @@ const colors = require('colors');
 const deb_control = require('debian-control');
 const { Stream, Readable } = require('stream');
 
-const DB = require("nedb");
+const DB = require('nedb');
 
 
 const inspect_log_opts = {
