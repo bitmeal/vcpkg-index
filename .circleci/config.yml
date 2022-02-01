@@ -37,7 +37,6 @@ jobs:
           working_directory: ./app
           command: |
               npm ci &&
-              npm run make:dbfs &&
               NODE_ENV=production npm run build &&
               cp ./dist/index.html ./dist/404.html &&
               [[ ! -z $PAGES_CUSTOM_DOMAIN ]] && echo "$PAGES_CUSTOM_DOMAIN" > ./dist/CNAME
