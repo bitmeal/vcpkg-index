@@ -35,11 +35,13 @@ jobs:
       - run: mkdir -p ./app/public/db && mv /data/vcpkg-index.nedb ./app/public/db/vcpkg-index.nedb
       - run:
           working_directory: ./app
+          command: npm ci
+      - run:
+          working_directory: ./app
           environment:
             NODE_ENV: production
             NODE_OPTIONS: --openssl-legacy-provider
           command: |
-              npm ci &&
               npm run build &&
               cp ./dist/index.html ./dist/404.html &&
               [[ ! -z $PAGES_CUSTOM_DOMAIN ]] && echo "$PAGES_CUSTOM_DOMAIN" > ./dist/CNAME
