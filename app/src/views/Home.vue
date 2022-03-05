@@ -47,6 +47,7 @@
               label="Search vcpkg packages"
               style="max-width: 600px"
               class="mt-5 mx-3 mx-md-12"
+              ref="searchBarHome"
             >
             </v-text-field>
           </v-col>
@@ -104,6 +105,13 @@ export default {
         }, 550);
       }, 250);
     },
+  },
+  mounted() {
+    this.$nextTick(() => {
+      setTimeout(() => {
+        this.$refs["searchBarHome"].$refs.input.focus();
+      });
+    });
   },
 };
 </script>
