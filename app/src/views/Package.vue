@@ -37,7 +37,7 @@
             </template>
             <span class="subtitle-2">Latest Version</span><br />
             <span class="font-weight-light">{{
-              item["version"] || item["version-string"]
+              item["version"] || item["version-string"] || item["version-semver"]
             }}</span>
             <template v-if="item['license']">
               <br /><br />
