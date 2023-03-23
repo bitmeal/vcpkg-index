@@ -21,8 +21,7 @@ module.exports = {
       aliasFields: [],
       // use browserfs
       alias: {
-        'fs': 'browserfs/dist/shims/fs.js',
-        // 'fs': require.resolve('./src/fs_shim.js'),
+        'fs': require.resolve('./src/fs_shim.js'),
         'buffer': 'browserfs/dist/shims/buffer.js',
         'path': 'browserfs/dist/shims/path.js',
         'processGlobal': 'browserfs/dist/shims/process.js',

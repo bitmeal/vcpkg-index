@@ -14,7 +14,7 @@
     "debian-control": "^1.0.0",
     "fast-glob": "^3.2.5",
     "fs": "^0.0.1-security",
-    "nedb": "github:bitmeal/nestdb",
+    "nedb": "^1.8.0",
     "path": "^0.12.7",
     "yaml": "^1.10.0"
   }

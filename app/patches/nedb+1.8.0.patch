@@ -1,0 +1,33 @@
+diff --git a/node_modules/nedb/lib/persistence.js b/node_modules/nedb/lib/persistence.js
+index 88a4948..9dc060c 100644
+--- a/node_modules/nedb/lib/persistence.js
++++ b/node_modules/nedb/lib/persistence.js
+@@ -119,26 +119,13 @@ Persistence.getNWAppFilename = function (appName, relativeFilename) {
+  */
+ Persistence.prototype.persistCachedDatabase = function (cb) {
+   var callback = cb || function () {}
+-    , toPersist = ''
+     , self = this
+     ;
+ 
+   if (this.inMemoryOnly) { return callback(null); }
+ 
+-  this.db.getAllData().forEach(function (doc) {
+-    toPersist += self.afterSerialization(model.serialize(doc)) + '\n';
+-  });
+-  Object.keys(this.db.indexes).forEach(function (fieldName) {
+-    if (fieldName != "_id") {   // The special _id index is managed by datastore.js, the others need to be persisted
+-      toPersist += self.afterSerialization(model.serialize({ $$indexCreated: { fieldName: fieldName, unique: self.db.indexes[fieldName].unique, sparse: self.db.indexes[fieldName].sparse }})) + '\n';
+-    }
+-  });
+-
+-  storage.crashSafeWriteFile(this.filename, toPersist, function (err) {
+-    if (err) { return callback(err); }
+-    self.db.emit('compaction.done');
+-    return callback(null);
+-  });
++  self.db.emit('compaction.done');
++  return callback(null);
+ };
+ 
+ 
