@@ -79,7 +79,7 @@ const fs_config = {
 };
 
 export default {
-  name: 'Index',
+  name: 'IndexView',
   data() {
     return {
       db: null, //new DB(),

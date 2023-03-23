@@ -111,7 +111,7 @@
 
 <script>
 export default {
-  name: "About",
+  name: "AboutView",
   data() {
     return {
       timestamp: process.env.VUE_APP_TIMESTAMP,

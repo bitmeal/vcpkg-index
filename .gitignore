@@ -3,4 +3,7 @@ node_modules/
 vcpkg/
 vcpkg-index.*
 
+*.nedb
+dist/
+
 .vscode/

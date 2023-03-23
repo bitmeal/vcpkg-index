@@ -49,7 +49,7 @@
 
 <script>
 export default {
-  name: "Search",
+  name: "SearchComponent",
 
   props: {
     db: {

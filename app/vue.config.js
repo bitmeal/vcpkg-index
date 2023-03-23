@@ -26,7 +26,12 @@ module.exports = {
         'path': 'browserfs/dist/shims/path.js',
         'processGlobal': 'browserfs/dist/shims/process.js',
         'bufferGlobal': 'browserfs/dist/shims/bufferGlobal.js',
-        'bfsGlobal': require.resolve('browserfs')
+        'bfsGlobal': require.resolve('browserfs'),
+      },
+      fallback: {
+        'crypto': require.resolve('crypto-browserify'),
+        'constants': require.resolve('constants-browserify'),
+        'stream': require.resolve('stream-browserify'),
       }
     },
     module: {
@@ -38,11 +43,5 @@ module.exports = {
       // Expose BrowserFS, process, and Buffer globals
       new webpack.ProvidePlugin({ BrowserFS: 'bfsGlobal', process: 'processGlobal', Buffer: 'bufferGlobal' })
     ],
-    // DISABLE webpack polyfills
-    node: {
-      path: false,
-      process: false,
-      Buffer: false
-    },
   }
 }

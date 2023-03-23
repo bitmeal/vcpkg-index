@@ -83,7 +83,7 @@
 
 <script>
 export default {
-  name: "Home",
+  name: "HomeView",
   data() {
     return {
       search: "",
@@ -103,7 +103,7 @@ export default {
         setTimeout(() => {
           this.search_focus_transition = false;
         }, 550);
-      }, 250);
+      }, 300);
     },
   },
   mounted() {

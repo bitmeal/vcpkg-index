@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
-import About from '../views/About.vue'
-import Index from '../views/Index.vue'
-import Search from '../views/Search.vue'
-import Package from '../views/Package.vue'
+import HomeView from '../views/HomeView.vue'
+import AboutView from '../views/AboutView.vue'
+import IndexView from '../views/IndexView.vue'
+import SearchComponent from '../views/SearchComponent.vue'
+import PackageComponent from '../views/PackageComponent.vue'
 
 Vue.use(VueRouter)
 
@@ -12,39 +12,39 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: Home
+    component: HomeView
   },
   {
     path: '/about',
     name: 'about',
-    component: About
+    component: AboutView
   },
   {
     path: '/index',
     name: 'index',
-    component: Index,
+    component: IndexView,
     children: [
       {
         path: '/index',
         name: 'searchindex',
-        component: Search
+        component: SearchComponent
       },
       {
         path: '/index/search',
         name: 'searchall',
-        component: Search
+        component: SearchComponent
       },
       {
         path: '/index/search/:search',
         name: 'search',
         props: true,
-        component: Search
+        component: SearchComponent
       },
       {
         path: '/index/pkg/:name',
         name: 'package',
         props: true,
-        component: Package
+        component: PackageComponent
       },
     ]
   }

@@ -243,7 +243,7 @@
 const pfp = require("../platform-parser");
 
 export default {
-  name: "Package",
+  name: "PackageComponent",
 
   props: {
     name: {
