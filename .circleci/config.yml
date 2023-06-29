@@ -3,7 +3,7 @@ version: 2.1
 executors:
   node-alpine:
     docker:
-      - image: node:alpine
+      - image: node:18-alpine
   alpine:
     docker:
       - image: alpine:latest
